@@ -1,5 +1,4 @@
-import { getConnection } from "typeorm";
-import { hash } from "argon2";
+import { hash, verify } from "argon2";
 import jwt from "jsonwebtoken";
 import {
   Arg,
@@ -10,6 +9,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
+import { getConnection } from "typeorm";
 import { User } from "./../entities/user";
 import { MyContext } from "./../types/MyContext";
 import { FieldError } from "./../utils/FieldErrorsType";
@@ -27,9 +27,13 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  @Query(() => [User])
-  async users() {
-    return User.find();
+  @Query(() => User, { nullable: true })
+  async me(@Ctx() { req }: MyContext) {
+    if (!req.userId) {
+      return null;
+    }
+    const user = await User.findOne(req.userId);
+    return user;
   }
 
   @Mutation(() => UserResponse)
@@ -79,5 +83,44 @@ export class UserResolver {
     }
 
     return { user };
+  }
+
+  @Mutation(() => UserResponse)
+  async login(
+    @Arg("email") email: string,
+    @Arg("password") password: string,
+    @Ctx() { res }: MyContext
+  ): Promise<UserResponse> {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return { errors: [{ field: "email", message: "user doesn't exists" }] };
+    }
+
+    const valid = await verify(user.password, password);
+
+    if (!valid) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "Password incorrect",
+          },
+        ],
+      };
+    }
+
+    const token = jwt.sign({ userId: user?.id }, `${process.env.JWT_SECRET}`);
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 100000000000,
+    });
+
+    return { user };
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() { res }: MyContext) {
+    res.clearCookie("token");
+    return true;
   }
 }
