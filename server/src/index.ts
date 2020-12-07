@@ -1,3 +1,5 @@
+import { User } from "./entities/user";
+import { UserResolver } from "./resolvers/user";
 import { ApolloServer } from "apollo-server-express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -7,7 +9,6 @@ import jwt from "jsonwebtoken";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
-import { HelloResolver } from "./resolvers/Hello";
 import { MyContext } from "./types/MyContext";
 
 config();
@@ -22,7 +23,7 @@ const main = async () => {
     database: "reddit",
     synchronize: true,
     logging: true,
-    entities: [],
+    entities: [User],
   });
 
   const app = express();
@@ -42,7 +43,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver],
+      resolvers: [UserResolver],
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({
