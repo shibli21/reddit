@@ -1,3 +1,4 @@
+import { FieldError } from "./../utils/FieldErrorsType";
 import { Sub } from "./../entities/sub";
 import { isAuth } from "./../middleware/isAuth";
 import { User } from "./../entities/user";
@@ -8,6 +9,7 @@ import {
   Field,
   InputType,
   Mutation,
+  ObjectType,
   Query,
   Resolver,
   UseMiddleware,
@@ -26,11 +28,63 @@ class PostInputType {
   subName!: string;
 }
 
+@InputType()
+class GetPostInputType {
+  @Field()
+  slug: string;
+
+  @Field()
+  identifier: string;
+}
+
+@ObjectType()
+class GetPostResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+
+  @Field(() => Post, { nullable: true })
+  post?: Post;
+}
+
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
   posts() {
-    return Post.find({ relations: ["user"] });
+    return Post.find({
+      relations: ["user", "sub"],
+      order: {
+        createdAt: "DESC",
+      },
+    });
+  }
+
+  @Query(() => GetPostResponse)
+  async getPost(
+    @Arg("input") input: GetPostInputType
+  ): Promise<GetPostResponse> {
+    const post = await Post.findOne({
+      where: {
+        identifier: input.identifier,
+        slug: input.slug,
+      },
+      relations: ["user", "sub"],
+      order: {
+        createdAt: "DESC",
+      },
+    });
+
+    if (!post) {
+      return {
+        errors: [
+          {
+            field: "post",
+            message: "something went wrong",
+          },
+        ],
+      };
+    }
+
+    return { post };
   }
 
   @UseMiddleware(isAuth)
