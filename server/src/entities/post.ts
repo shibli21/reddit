@@ -1,4 +1,3 @@
-import { Sub } from "./sub";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -9,11 +8,14 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
 import { slugify } from "../utils/createSlug";
 import { makeId } from "../utils/generateRandom";
+import { Comment } from "./comment";
+import { Sub } from "./sub";
 import { User } from "./user";
 
 @Entity()
@@ -54,6 +56,10 @@ export class Post extends BaseEntity {
   @ManyToOne(() => Sub, (sub) => sub.posts)
   @JoinColumn({ name: "subName", referencedColumnName: "name" })
   sub!: Sub;
+
+  @Field(() => [Comment])
+  @OneToMany(() => Comment, (comment) => comment.post)
+  comments: Comment[];
 
   @Field(() => String)
   @CreateDateColumn()

@@ -67,7 +67,7 @@ export class PostResolver {
         identifier: input.identifier,
         slug: input.slug,
       },
-      relations: ["user", "sub"],
+      relations: ["user", "sub", "comments"],
       order: {
         createdAt: "DESC",
       },
