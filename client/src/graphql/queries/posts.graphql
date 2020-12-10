@@ -1,0 +1,17 @@
+query Posts {
+  posts {
+    id
+    title
+    slug
+    identifier
+    body
+    subName
+    user {
+      username
+    }
+    comments {
+      body
+      username
+    }
+  }
+}

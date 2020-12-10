@@ -63,7 +63,7 @@ const NavBar = (props: Props) => {
                     <div
                       className={`absolute right-0 ${
                         !profileMenu ? "hidden" : ""
-                      } w-48 py-1 mt-2 origin-top-right bg-white  shadow-lg ring-1 ring-black ring-opacity-5`}
+                      } w-48 py-1 mt-2 cursor-pointer origin-top-right bg-white  shadow-lg ring-1 ring-black ring-opacity-5`}
                       role="menu"
                       aria-orientation="vertical"
                       aria-labelledby="user-menu"
