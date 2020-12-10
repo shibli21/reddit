@@ -51,7 +51,7 @@ export class PostResolver {
   @Query(() => [Post])
   posts() {
     return Post.find({
-      relations: ["user", "sub"],
+      relations: ["user", "sub", "comments"],
       order: {
         createdAt: "DESC",
       },
