@@ -1,8 +1,4 @@
-import { FieldError } from "./../utils/FieldErrorsType";
-import { Sub } from "./../entities/sub";
-import { isAuth } from "./../middleware/isAuth";
-import { User } from "./../entities/user";
-import { Post } from "./../entities/post";
+import { MyContext } from "src/types/MyContext";
 import {
   Arg,
   Ctx,
@@ -14,7 +10,11 @@ import {
   Resolver,
   UseMiddleware,
 } from "type-graphql";
-import { MyContext } from "src/types/MyContext";
+import { Post } from "./../entities/post";
+import { Sub } from "./../entities/sub";
+import { User } from "./../entities/user";
+import { isAuth } from "./../middleware/isAuth";
+import { FieldError } from "./../utils/FieldErrorsType";
 
 @InputType()
 class PostInputType {
@@ -67,7 +67,18 @@ export class PostResolver {
         identifier: input.identifier,
         slug: input.slug,
       },
-      relations: ["user", "sub", "comments"],
+      relations: [
+        "user",
+        "sub",
+        "comments",
+        "comments.vote",
+        "comments.post",
+        "comments.user",
+        "vote",
+        "vote.comment",
+        "vote.post",
+        "vote.user",
+      ],
       order: {
         createdAt: "DESC",
       },

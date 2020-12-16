@@ -1,3 +1,4 @@
+import { Vote } from "./vote";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -17,6 +18,7 @@ import { makeId } from "../utils/generateRandom";
 import { Comment } from "./comment";
 import { Sub } from "./sub";
 import { User } from "./user";
+import { Expose } from "class-transformer";
 
 @Entity()
 @ObjectType()
@@ -61,6 +63,10 @@ export class Post extends BaseEntity {
   @OneToMany(() => Comment, (comment) => comment.post)
   comments: Comment[];
 
+  @Field(() => [Vote])
+  @OneToMany(() => Vote, (vote) => vote.post)
+  vote!: Vote[];
+
   @Field(() => String)
   @CreateDateColumn()
   createdAt!: Date;
@@ -68,6 +74,18 @@ export class Post extends BaseEntity {
   @Field(() => String)
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Field(() => Number)
+  @Expose()
+  get commentsCount(): Number {
+    return this.comments.length;
+  }
+
+  @Field(() => Number)
+  @Expose()
+  get votesCount(): Number {
+    return this.vote?.reduce((prev, curr) => prev + (curr.value || 0), 0);
+  }
 
   @BeforeInsert()
   makeIdAndSlug() {

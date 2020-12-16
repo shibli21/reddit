@@ -42,7 +42,7 @@ export class Sub extends BaseEntity {
   @Field()
   bannerUrn: string;
 
-  @Field()
+  @Field(() => User)
   @ManyToOne(() => User)
   @JoinColumn({ name: "username", referencedColumnName: "email" })
   user!: User;

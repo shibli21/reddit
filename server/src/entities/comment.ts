@@ -1,3 +1,5 @@
+import { Expose } from "class-transformer";
+import { Vote } from "./vote";
 import { Field, ObjectType } from "type-graphql";
 import {
   BaseEntity,
@@ -7,6 +9,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from "typeorm";
@@ -33,7 +36,7 @@ export class Comment extends BaseEntity {
   @Field()
   username: string;
 
-  @Field()
+  @Field(() => User)
   @ManyToOne(() => User)
   @JoinColumn({ name: "username", referencedColumnName: "email" })
   user!: User;
@@ -42,6 +45,10 @@ export class Comment extends BaseEntity {
   @ManyToOne(() => Post, (post) => post.comments)
   post!: Post;
 
+  @Field(() => [Vote])
+  @OneToMany(() => Vote, (vote) => vote.comment)
+  vote!: Vote[];
+
   @Field(() => String)
   @CreateDateColumn()
   createdAt!: Date;
@@ -49,6 +56,12 @@ export class Comment extends BaseEntity {
   @Field(() => String)
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @Field(() => Number)
+  @Expose()
+  get votesCount(): Number {
+    return this.vote?.reduce((prev, curr) => prev + (curr.value || 0), 0);
+  }
 
   @BeforeInsert()
   makeId() {

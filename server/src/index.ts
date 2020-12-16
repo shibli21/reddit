@@ -7,14 +7,6 @@ import jwt from "jsonwebtoken";
 import "reflect-metadata";
 import { buildSchema } from "type-graphql";
 import { createConnection } from "typeorm";
-import { Comment } from "./entities/comment";
-import { Post } from "./entities/post";
-import { Sub } from "./entities/sub";
-import { User } from "./entities/user";
-import { CommentResolver } from "./resolvers/comment";
-import { PostResolver } from "./resolvers/post";
-import { SubResolver } from "./resolvers/sub";
-import { UserResolver } from "./resolvers/user";
 import { MyContext } from "./types/MyContext";
 
 config();
@@ -29,7 +21,7 @@ const main = async () => {
     database: "reddit",
     synchronize: true,
     logging: true,
-    entities: [User, Post, Sub, Comment],
+    entities: ["src/entities/*.ts"],
   });
 
   const app = express();
@@ -49,7 +41,7 @@ const main = async () => {
 
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, PostResolver, SubResolver, CommentResolver],
+      resolvers: [__dirname + "/resolvers/*.ts"],
       validate: false,
     }),
     context: ({ req, res }): MyContext => ({
